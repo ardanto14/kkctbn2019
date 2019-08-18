@@ -1,0 +1,7 @@
+<launch>
+
+    <node pkg="kkctbn2019" name="command" type="command" output="screen"/>
+
+    <node pkg="kkctbn2019" name="controller" type="controller" output="screen"/>
+
+</launch>
