@@ -1,0 +1,10 @@
+<launch>
+
+    <node pkg="kkctbn2019" name="image_receiver" type="image_receiver" output="screen"/>
+
+    <node pkg="kkctbn2019" name="image_proccessing" type="image_proccessing.py" output="screen"/>
+
+    <node pkg="kkctbn2019" name="ai" type="ai" output="screen"/>
+    
+
+</launch>

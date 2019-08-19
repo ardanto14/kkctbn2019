@@ -8,11 +8,18 @@ project(kkctbn2019)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  cv_bridge
+  image_transport
+  sensor_msgs
   roscpp
   rospy
   std_msgs
   genmsg
   mavros_msgs
+)
+
+find_package(
+  OpenCV REQUIRED
 )
 
 ## System dependencies are found with CMake's conventions
@@ -75,6 +82,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   mavros_msgs
+  sensor_msgs
 )
 
 ################################################
@@ -119,7 +127,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include ${catkin_INCLUDE_DIRS}
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -155,11 +163,17 @@ include_directories(include ${catkin_INCLUDE_DIRS}
 add_executable(controller src/controller.cpp)
 target_link_libraries(controller ${catkin_LIBRARIES})
 
-add_executable(command src/command.cpp)
-target_link_libraries(command ${catkin_LIBRARIES})
+add_executable(ai src/ai.cpp)
+target_link_libraries(ai ${catkin_LIBRARIES})
 
 add_executable(mode src/mode.cpp)
 target_link_libraries(mode ${catkin_LIBRARIES})
+
+add_executable(image_receiver src/image_receiver.cpp )
+target_link_libraries(image_receiver
+${catkin_LIBRARIES}
+${OpenCV_LIBRARIES}
+)
 
 #############
 ## Install ##

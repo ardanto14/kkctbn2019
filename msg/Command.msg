@@ -1,4 +1,6 @@
-bool maju
-bool mundur
-bool kiri
-bool kanan
+uint16 MAJU=1100
+uint16 MUNDUR=1101
+uint16 KIRI=1102
+uint16 KANAN=1103
+
+uint16 value

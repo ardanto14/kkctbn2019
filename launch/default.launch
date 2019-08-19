@@ -5,6 +5,10 @@
     <node pkg="kkctbn2019" name="controller" type="controller" output="screen"/>
 
     <node pkg="kkctbn2019" name="mode" type="mode" output="screen"/>
+
+    <node pkg="kkctbn2019" name="image_receiver" type="image_receiver" output="screen"/>
+
+    <node pkg="kkctbn2019" name="image_processing.py" type="image_processing.py" output="screen">
     
 
 </launch>

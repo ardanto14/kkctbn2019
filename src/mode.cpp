@@ -8,7 +8,6 @@ ros::Publisher mode_publisher;
 
 void pwmModeCallback(const mavros_msgs::RCIn::ConstPtr& msg) {
     int pwm = msg->channels[7];
-    ROS_INFO("Kesini");
     if (pwm < 1400) {
         kkctbn2019::Mode mode;
         mode.value = 1;

@@ -10,25 +10,40 @@ kkctbn2019::Mode mode;
 
 void commandCallback(const kkctbn2019::Command::ConstPtr& msg) {
 
-    if (mode.value == 3) {
+    if (mode.value == kkctbn2019::Mode::MANUAL) {
         ROS_INFO("MANUAL");
-    } else if (mode.value == 1) {
+    } else if (mode.value == kkctbn2019::Mode::AUTO) {
         ROS_INFO("AUTO");
-        if (msg->maju) {
+        if (msg->value == kkctbn2019::Command::MAJU) {
             ROS_INFO("maju");
-        } else if (msg->mundur) {
-            ROS_INFO("mundur");
             mavros_msgs::OverrideRCIn rcin;
             for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
             rcin.channels[2] = 1800;
             override_publisher.publish(rcin);
-        } else if (msg->kiri) {
+        } else if (msg->value == kkctbn2019::Command::MUNDUR) {
+            ROS_INFO("mundur");
+            mavros_msgs::OverrideRCIn rcin;
+            for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
+            rcin.channels[2] = 1200;
+            override_publisher.publish(rcin);
+        } else if (msg->value == kkctbn2019::Command::KIRI) {
             ROS_INFO("kiri");
-        } else if (msg->kanan) {
+            mavros_msgs::OverrideRCIn rcin;
+            for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
+            rcin.channels[2] = 1800;
+            rcin.channels[0] = 800;
+            override_publisher.publish(rcin);
+        } else if (msg->value == kkctbn2019::Command::KANAN) {
             ROS_INFO("kanan");
+            mavros_msgs::OverrideRCIn rcin;
+            for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
+            rcin.channels[2] = 1800;
+            rcin.channels[0] = 2200;
+            override_publisher.publish(rcin);
         }
     } else {
         ROS_INFO("HOLD");
+        
     }
 }
 
@@ -45,7 +60,7 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "controller");
     ros::NodeHandle nh;
 
-    override_publisher = nh.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 10);
+    override_publisher = nh.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 8);
 
     ros::Subscriber mode_subscriber = nh.subscribe("/makarax/mode", 8, modeCallback);
 
