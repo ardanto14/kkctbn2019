@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   genmsg
+  mavros_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -51,6 +52,8 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   Command.msg
+  ObjectCoordinate.msg
+  Mode.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -71,6 +74,7 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
+  mavros_msgs
 )
 
 ################################################
@@ -153,6 +157,9 @@ target_link_libraries(controller ${catkin_LIBRARIES})
 
 add_executable(command src/command.cpp)
 target_link_libraries(command ${catkin_LIBRARIES})
+
+add_executable(mode src/mode.cpp)
+target_link_libraries(mode ${catkin_LIBRARIES})
 
 #############
 ## Install ##

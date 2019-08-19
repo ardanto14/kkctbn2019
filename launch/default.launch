@@ -4,4 +4,7 @@
 
     <node pkg="kkctbn2019" name="controller" type="controller" output="screen"/>
 
+    <node pkg="kkctbn2019" name="mode" type="mode" output="screen"/>
+    
+
 </launch>
