@@ -8,6 +8,9 @@ project(kkctbn2019)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  cv_bridge
+  image_transport
+  sensor_msgs
   roscpp
   rospy
   std_msgs
@@ -17,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+find_package(OpenCV REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -75,6 +79,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   mavros_msgs
+  sensor_msgs
 )
 
 ################################################
@@ -119,7 +124,9 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include ${catkin_INCLUDE_DIRS}
+include_directories(include 
+${catkin_INCLUDE_DIRS}
+${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -160,6 +167,18 @@ target_link_libraries(command ${catkin_LIBRARIES})
 
 add_executable(mode src/mode.cpp)
 target_link_libraries(mode ${catkin_LIBRARIES})
+
+add_executable(camera_image src/camera_image.cpp )
+target_link_libraries(camera_image
+${catkin_LIBRARIES}
+${OpenCV_LIBRARIES}
+)
+
+add_executable(image_proccessing src/image_proccessing.cpp )
+target_link_libraries(image_proccessing
+${catkin_LIBRARIES}
+${OpenCV_LIBRARIES}
+)
 
 #############
 ## Install ##
