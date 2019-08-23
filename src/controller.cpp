@@ -3,7 +3,6 @@
 #include <kkctbn2019/Command.h>
 #include <kkctbn2019/Mode.h>
 #include <mavros_msgs/OverrideRCIn.h>
-#include <mavros_msgs/SetMode.h>
 
 ros::Publisher override_publisher;
 kkctbn2019::Mode mode;
@@ -18,7 +17,7 @@ void commandCallback(const kkctbn2019::Command::ConstPtr& msg) {
             ROS_INFO("maju");
             mavros_msgs::OverrideRCIn rcin;
             for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
-            rcin.channels[2] = 1800;
+            rcin.channels[2] = 1700;
             override_publisher.publish(rcin);
         } else if (msg->value == kkctbn2019::Command::MUNDUR) {
             ROS_INFO("mundur");
@@ -30,14 +29,14 @@ void commandCallback(const kkctbn2019::Command::ConstPtr& msg) {
             ROS_INFO("kiri");
             mavros_msgs::OverrideRCIn rcin;
             for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
-            rcin.channels[2] = 1800;
+            rcin.channels[2] = 1700;
             rcin.channels[0] = 800;
             override_publisher.publish(rcin);
         } else if (msg->value == kkctbn2019::Command::KANAN) {
             ROS_INFO("kanan");
             mavros_msgs::OverrideRCIn rcin;
             for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
-            rcin.channels[2] = 1800;
+            rcin.channels[2] = 1700;
             rcin.channels[0] = 2200;
             override_publisher.publish(rcin);
         }
@@ -49,7 +48,7 @@ void commandCallback(const kkctbn2019::Command::ConstPtr& msg) {
 
 void modeCallback(const kkctbn2019::Mode::ConstPtr& msg) {
     mode = *msg;
-    if (mode.value == 3) {
+    if (mode.value == kkctbn2019::Mode::MANUAL) {
         mavros_msgs::OverrideRCIn rcin;
         for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
         override_publisher.publish(rcin);

@@ -31,20 +31,12 @@ if __name__ == '__main__':
         cv2.namedWindow("Trackbars")
         cv2.namedWindow("Frame")
         cv2.namedWindow("Mask")
-        cv2.createTrackbar("L-H", "Trackbars", 0, 180, nothing)
+        cv2.createTrackbar("L-H", "Trackbars", 0, 255, nothing)
         cv2.createTrackbar("L-S", "Trackbars", 66, 255, nothing)
         cv2.createTrackbar("L-V", "Trackbars", 126, 255, nothing)
-        cv2.createTrackbar("U-H", "Trackbars", 180, 180, nothing)
+        cv2.createTrackbar("U-H", "Trackbars", 180, 255, nothing)
         cv2.createTrackbar("U-S", "Trackbars", 255, 255, nothing)
         cv2.createTrackbar("U-V", "Trackbars", 223, 255, nothing)
-        cv2.createTrackbar("poin1_x", "Trackbars", 352, 2500, nothing)
-        cv2.createTrackbar("poin1_y", "Trackbars", 119, 2500, nothing)
-        cv2.createTrackbar("poin2_x", "Trackbars", 565, 2500, nothing)
-        cv2.createTrackbar("poin2_y", "Trackbars", 113, 2500, nothing)
-        cv2.createTrackbar("poin3_x", "Trackbars", 158, 2500, nothing)
-        cv2.createTrackbar("poin3_y", "Trackbars", 278, 2500, nothing)
-        cv2.createTrackbar("poin4_x", "Trackbars", 428, 2500, nothing)
-        cv2.createTrackbar("poin4_y", "Trackbars", 347, 2500, nothing)
         while not rospy.is_shutdown():
             data = rospy.wait_for_message('/makarax/image', Image)
             # do stuff
@@ -84,7 +76,7 @@ if __name__ == '__main__':
                 x = approx.ravel()[0]
                 y = approx.ravel()[1]
 
-                if area > 150:
+                if area > 400:
                     cv2.drawContours(frame, [approx], 0, (0, 0, 0), 5)
 
                     if 7 <= len(approx) < 20:

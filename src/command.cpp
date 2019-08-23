@@ -7,7 +7,6 @@ ros::Publisher command_publisher;
 
 void objectCountCallback(const std_msgs::UInt16::ConstPtr& msg) {
     if (msg->data > 0) {
-        ROS_INFO("kesini");
         kkctbn2019::Command command;
         command.value = kkctbn2019::Command::KANAN;
         command_publisher.publish(command);
@@ -19,7 +18,7 @@ void objectCountCallback(const std_msgs::UInt16::ConstPtr& msg) {
 }
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "ai");
+    ros::init(argc, argv, "command");
     ros::NodeHandle nh;
 
     command_publisher = nh.advertise<kkctbn2019::Command>("/makarax/command", 8);

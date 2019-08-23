@@ -10,15 +10,15 @@ void pwmModeCallback(const mavros_msgs::RCIn::ConstPtr& msg) {
     int pwm = msg->channels[7];
     if (pwm < 1400) {
         kkctbn2019::Mode mode;
-        mode.value = 1;
+        mode.value = kkctbn2019::Mode::HOLD;
         mode_publisher.publish(mode);
     } else if (pwm > 1600) {
         kkctbn2019::Mode mode;
-        mode.value = 3;
+        mode.value = kkctbn2019::Mode::MANUAL;
         mode_publisher.publish(mode);
     } else {
         kkctbn2019::Mode mode;
-        mode.value = 2;
+        mode.value = kkctbn2019::Mode::AUTO;
         mode_publisher.publish(mode);
     }
 }
