@@ -169,12 +169,6 @@ target_link_libraries(command ${catkin_LIBRARIES})
 add_executable(mode src/mode.cpp)
 target_link_libraries(mode ${catkin_LIBRARIES})
 
-add_executable(image_receiver src/image_receiver.cpp )
-target_link_libraries(image_receiver
-${catkin_LIBRARIES}
-${OpenCV_LIBRARIES}
-)
-
 #############
 ## Install ##
 #############

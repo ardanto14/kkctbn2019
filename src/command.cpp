@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     ros::NodeHandle nh;
 
     command_publisher = nh.advertise<kkctbn2019::Command>("/makarax/command", 8);
-    ros::Subscriber object_count_subscriber = nh.subscribe("/makarax/object/count", 8, objectCountCallback);
+    ros::Subscriber object_count_subscriber = nh.subscribe("/makarax/object/count/red", 8, objectCountCallback);
 
     ROS_WARN("AI is active");
     

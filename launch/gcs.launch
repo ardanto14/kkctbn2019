@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="kkctbn2019" name="iamge_shower" type="iamge_shower.py" output="screen"/>
+    
+</launch>
