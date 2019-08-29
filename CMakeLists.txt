@@ -9,7 +9,6 @@ project(kkctbn2019)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
-  image_transport
   sensor_msgs
   roscpp
   rospy
