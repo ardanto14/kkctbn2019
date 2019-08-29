@@ -3,5 +3,6 @@
         "/home/nathan/kkctbn_ws/devel/lib/python2.7/dist-packages",
         "/home/nathan/KKCTBN_2018/devel/lib/python2.7/dist-packages",
         "/opt/ros/melodic/lib/python2.7/dist-packages"
-    ]
+    ],
+    "C_Cpp.errorSquiggles": "Disabled"
 }

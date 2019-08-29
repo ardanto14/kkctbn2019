@@ -1,1 +1,2 @@
 int16 value
+float64 kecepatan

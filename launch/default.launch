@@ -6,5 +6,6 @@
 
     <node pkg="kkctbn2019" name="mode" type="mode" output="screen"/>
     
+    <node pkg="kkctbn2019" name="speed_controller" type="speed_controller" output="screen"/>
 
 </launch>

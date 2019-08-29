@@ -159,26 +159,29 @@ ${OpenCV_INCLUDE_DIRS}
 #   ${catkin_LIBRARIES}
 # )
 
-add_executable(controller src/controller.cpp)
+add_executable(controller src/controller/controller.cpp)
 target_link_libraries(controller ${catkin_LIBRARIES})
 
-add_executable(command src/command.cpp)
+add_executable(command src/controller/command.cpp)
 target_link_libraries(command ${catkin_LIBRARIES})
 
-add_executable(mode src/mode.cpp)
+add_executable(mode src/controller/mode.cpp)
 target_link_libraries(mode ${catkin_LIBRARIES})
 
-add_executable(camera_image src/camera_image.cpp )
-target_link_libraries(camera_image
+add_executable(camera_capture src/image/camera_capture.cpp )
+target_link_libraries(camera_capture
 ${catkin_LIBRARIES}
 ${OpenCV_LIBRARIES}
 )
 
-add_executable(image_proccessing src/image_proccessing.cpp )
+add_executable(image_proccessing src/image/image_proccessing.cpp )
 target_link_libraries(image_proccessing
 ${catkin_LIBRARIES}
 ${OpenCV_LIBRARIES}
 )
+
+add_executable(speed_controller src/controller/speed_controller.cpp)
+target_link_libraries(speed_controller ${catkin_LIBRARIES})
 
 #############
 ## Install ##
