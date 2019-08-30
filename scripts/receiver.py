@@ -1,4 +1,4 @@
-#!/user/bin/env python
+#!/usr/bin/env python
 import cv2
 import rospy
 from cv_bridge import CvBridge, CvBridgeError

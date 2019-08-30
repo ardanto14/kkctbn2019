@@ -28,10 +28,10 @@ if __name__ == '__main__':
         rospy.init_node('image_processing', anonymous=True)
 
         sub = rospy.Subscriber('/makarax/image', Image, callback1)
-        publisher_red = rospy.Publisher('/makarax/object/count/red', UInt16, 8)
-        publisher_green = rospy.Publisher('/makarax/object/count/green', UInt16, 8)
-        red_mask_publisher = rospy.Publisher("/makarax/image/mask/red", Image, 8)
-        green_mask_publisher = rospy.Publisher("/makarax/image/mask/green", Image, 8)
+        publisher_red = rospy.Publisher('/makarax/object/count/red', UInt16, queue_size=8)
+        publisher_green = rospy.Publisher('/makarax/object/count/green', UInt16, queue_size=8)
+        red_mask_publisher = rospy.Publisher("/makarax/image/mask/red", Image, queue_size=8)
+        green_mask_publisher = rospy.Publisher("/makarax/image/mask/green", Image, queue_size=8)
 
         bridge = CvBridge()
 
