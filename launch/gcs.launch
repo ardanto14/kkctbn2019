@@ -1,5 +1,7 @@
 <launch>
 
     <node pkg="kkctbn2019" name="image_shower" type="image_shower.py" output="screen"/>
+
+    <node pkg="kkctbn2019" name="threshold" type="threshold.py" output="screen"/>
     
 </launch>
