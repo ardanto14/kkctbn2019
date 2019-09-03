@@ -9,7 +9,7 @@ import cv2
 import rospy
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
-from std_msgs.msg import UInt16
+from std_msgs.msg import UInt16, Float64
 import random
 
 font = cv2.FONT_HERSHEY_COMPLEX
@@ -29,7 +29,9 @@ if __name__ == '__main__':
 
         sub = rospy.Subscriber('/makarax/image', Image, callback1)
         publisher_red = rospy.Publisher('/makarax/object/count/red', UInt16, queue_size=8)
-        publisher_green = rospy.Publisher('/makarax/object/count/green', UInt16, queue_size=8)
+        # publisher_green = rospy.Publisher('/makarax/object/count/green', UInt16, queue_size=8)
+        # setpoint_publisher = rospy.Publisher("setpoint", Float64, queue_size=1)
+        state_publisher = rospy.Publisher("state", Float64, queue_size=1)
         red_mask_publisher = rospy.Publisher("/makarax/image/mask/red", Image, queue_size=8)
         green_mask_publisher = rospy.Publisher("/makarax/image/mask/green", Image, queue_size=8)
 
@@ -39,7 +41,7 @@ if __name__ == '__main__':
         cv2.namedWindow("Trackbars")
         cv2.namedWindow("Frame")
         cv2.namedWindow("red_mask")
-        cv2.namedWindow("green_mask")
+        # cv2.namedWindow("green_mask")
         cv2.createTrackbar("RED L-H", "Trackbars", 0, 255, nothing)
         cv2.createTrackbar("RED L-S", "Trackbars", 0, 255, nothing)
         cv2.createTrackbar("RED L-V", "Trackbars", 0, 255, nothing)
@@ -53,6 +55,7 @@ if __name__ == '__main__':
         cv2.createTrackbar("GREEN U-H", "Trackbars", 255, 255, nothing)
         cv2.createTrackbar("GREEN U-S", "Trackbars", 255, 255, nothing)
         cv2.createTrackbar("GREEN U-V", "Trackbars", 255, 255, nothing)
+        rate = rospy.Rate(20)
         while not rospy.is_shutdown():
             data = rospy.wait_for_message('/makarax/image', Image)
             # do stuff
@@ -61,10 +64,13 @@ if __name__ == '__main__':
             bridge = CvBridge()
             ori = bridge.imgmsg_to_cv2(data)
             frame = ori.copy()
+            height, width = frame.shape[:2]
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             hsv = cv2.GaussianBlur(hsv, (5, 5), 1)
-
-            ''' RED '''
+            cv2.line(frame, (width, height/2), (0, height/2), (0,255,0), 2)
+            cv2.line(frame, (width/3, height), (width/3, 0), (0,255,0), 2)
+            
+            # RED
             l_h = cv2.getTrackbarPos("RED L-H", "Trackbars")
             l_s = cv2.getTrackbarPos("RED L-S", "Trackbars")
             l_v = cv2.getTrackbarPos("RED L-V", "Trackbars")
@@ -85,22 +91,32 @@ if __name__ == '__main__':
             red_mask_publisher.publish(published_red_mask)
             # Contours detection
             contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
+            max_area = 0
+            max_contour = None
+            max_x = 0
 
             for cnt in contours:
                 area = cv2.contourArea(cnt)
                 approx = cv2.approxPolyDP(cnt, 0.02*cv2.arcLength(cnt, True), True)
-                x = approx.ravel()[0]
-                y = approx.ravel()[1]
-
-                if area > MIN_AREA:
+                M = cv2.moments(cnt)
+                if M["m00"] == 0:
+                    continue
+                x = int(M["m10"] / M["m00"])
+                y = int(M["m01"] / M["m00"])
+                
+                if area > MIN_AREA and y > height/2:
                     cv2.drawContours(frame, [approx], 0, (0, 0, 0), 5)
-
+                    cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
                     if 7 <= len(approx) < 20:
                         cv2.putText(frame, "Circle Red", (x, y), font, 0.5, (0, 0, 255))
                         count_red += 1
+                        if area > max_area:
+                            max_area = area
+                            max_contour = cnt
+                            max_x = x
 
-
-            ''' GREEN '''
+            '''
+            # GREEN
             l_h = cv2.getTrackbarPos("GREEN L-H", "Trackbars")
             l_s = cv2.getTrackbarPos("GREEN L-S", "Trackbars")
             l_v = cv2.getTrackbarPos("GREEN L-V", "Trackbars")
@@ -128,24 +144,32 @@ if __name__ == '__main__':
                 approx = cv2.approxPolyDP(cnt, 0.02*cv2.arcLength(cnt, True), True)
                 x = approx.ravel()[0]
                 y = approx.ravel()[1]
-
+                moments = cv2.moments(cnt)
+                x = int(moments['m10'] / moments['m00'])
+                y = int(moments['m01'] / moments['m00'])
                 if area > MIN_AREA:
                     cv2.drawContours(frame, [approx], 0, (0, 0, 0), 5)
 
                     if 7 <= len(approx) < 20:
                         cv2.putText(frame, "Circle Green", (x, y), font, 0.5, (0, 0, 255))
                         count_green += 1
-
+            '''
             cv2.imshow("Frame", frame)
             cv2.imshow("red_mask", red_mask)
-            cv2.imshow("green_mask", green_mask)
             cv2.waitKey(30)
             red = UInt16()
             red.data = count_red
             publisher_red.publish(red)
-            green = UInt16()
-            red.data = count_green
-            publisher_green.publish(green)
+            print(max_x)
+            state = Float64()
+            if max_x == 0:
+                continue
+            state.data = max_x
+            state_publisher.publish(state)
+            # green = UInt16()
+            # red.data = count_green
+            # publisher_green.publish(green)
+            rate.sleep()
 
     except rospy.ROSInterruptException:
         cv2.destroyAllWindows()

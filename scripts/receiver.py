@@ -6,7 +6,7 @@ from sensor_msgs.msg import Image
 
 if __name__  == '__main__':
     rospy.init_node("receiver")
-    image_publisher = rospy.Publisher("/makarax/image", Image, 8)
+    image_publisher = rospy.Publisher("/makarax/image", Image, queue_size=8)
     cap = cv2.VideoCapture(0)
     bridge = CvBridge()
     while not rospy.is_shutdown():
