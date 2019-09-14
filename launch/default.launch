@@ -11,6 +11,11 @@
     <node pkg="kkctbn2019" name="image_proccessing" type="image_proccessing.py" output="screen"/>
 
     <node pkg="pid" name="setpoint" type="setpoint_node" output="screen"/>
+
+    <node respawn="true" pkg="joy" type="joy_node" name="turtle_joy" >
+      <param name="dev" type="string" value="/dev/input/js0" />
+      <param name="deadzone" value="0.12" />
+    </node>
     
     <node name="controller" pkg="pid" type="controller" >
       <param name="Kp" value="0.4" />
