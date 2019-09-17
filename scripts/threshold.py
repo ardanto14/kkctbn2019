@@ -32,9 +32,9 @@ if __name__ == '__main__':
         cv2.startWindowThread()
         cv2.namedWindow("Trackbars")
         cv2.createTrackbar("RED L-H", "Trackbars", 0, 255, nothing)
-        cv2.createTrackbar("RED L-S", "Trackbars", 0, 255, nothing)
-        cv2.createTrackbar("RED L-V", "Trackbars", 0, 255, nothing)
-        cv2.createTrackbar("RED U-H", "Trackbars", 255, 255, nothing)
+        cv2.createTrackbar("RED L-S", "Trackbars", 56, 255, nothing)
+        cv2.createTrackbar("RED L-V", "Trackbars", 112, 255, nothing)
+        cv2.createTrackbar("RED U-H", "Trackbars", 19, 255, nothing)
         cv2.createTrackbar("RED U-S", "Trackbars", 255, 255, nothing)
         cv2.createTrackbar("RED U-V", "Trackbars", 255, 255, nothing)
 

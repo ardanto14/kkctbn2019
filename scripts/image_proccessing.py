@@ -17,15 +17,25 @@ font = cv2.FONT_HERSHEY_COMPLEX
 data = None
 MIN_AREA = 1000
 
+threshold = Threshold()
+threshold.l_h = 0
+threshold.l_s = 0
+threshold.l_v = 0
+threshold.u_h = 255
+threshold.u_s = 255
+threshold.u_v = 255
+
 def nothing(x):
     pass
 
+def abc(threshold_in):
+    threshold = threshold_in
 
 if __name__ == '__main__':
     rospy.init_node('image_processing', anonymous=True)
 
     image_subscriber = rospy.Subscriber('/makarax/image', Image, nothing)
-    threshold_subscriber = rospy.Subscriber("/makarax/threshold", Threshold, nothing)
+    threshold_subscriber = rospy.Subscriber("/makarax/threshold", Threshold, abc)
     publisher_red = rospy.Publisher('/makarax/object/count/red', UInt16, queue_size=8)
     # publisher_green = rospy.Publisher('/makarax/object/count/green', UInt16, queue_size=8)
     state_publisher = rospy.Publisher("state", Float64, queue_size=8)
@@ -50,8 +60,10 @@ if __name__ == '__main__':
     # cv2.createTrackbar("GREEN U-H", "Trackbars", 255, 255, nothing)
     # cv2.createTrackbar("GREEN U-S", "Trackbars", 255, 255, nothing)
     # cv2.createTrackbar("GREEN U-V", "Trackbars", 255, 255, nothing)
+    
     while not rospy.is_shutdown():
         data = rospy.wait_for_message('/makarax/image', Image)
+	print("kesini")
         threshold = rospy.wait_for_message('/makarax/threshold', Threshold)
         # do stuff
         count_red = 0
@@ -59,11 +71,15 @@ if __name__ == '__main__':
         bridge = CvBridge()
         ori = bridge.imgmsg_to_cv2(data)
         frame = ori.copy()
+	frame = np.int16(frame)
+	frame = frame * (50/127+1) - 50 + 70
+	frame = np.clip(frame, 0, 255)
+	frame = np.uint8(frame)
         height, width = frame.shape[:2]
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         hsv = cv2.GaussianBlur(hsv, (5, 5), 1)
         cv2.line(frame, (width, height/2), (0, height/2), (0,255,0), 2)
-        cv2.line(frame, (width/3, height), (width/3, 0), (0,255,0), 2)
+        cv2.line(frame, (30, height), (30, 0), (0,255,0), 2)
         
         # RED
         l_h = threshold.l_h
@@ -85,10 +101,8 @@ if __name__ == '__main__':
         
         # Contours detection
         contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
-        max_area = 0
-        max_contour = None
-        max_x = 0
-
+        min_x = 9999
+	print("kesini")
         for cnt in contours:
             area = cv2.contourArea(cnt)
             approx = cv2.approxPolyDP(cnt, 0.02*cv2.arcLength(cnt, True), True)
@@ -98,16 +112,14 @@ if __name__ == '__main__':
             x = int(M["m10"] / M["m00"])
             y = int(M["m01"] / M["m00"])
             
-            if area > MIN_AREA and y > height/2:
+            if area > MIN_AREA: # and y > height/2:
                 cv2.drawContours(frame, [approx], 0, (0, 0, 0), 5)
                 cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
                 if 7 <= len(approx) < 20:
                     cv2.putText(frame, "Circle Red", (x, y), font, 0.5, (0, 0, 255))
                     count_red += 1
-                    if area > max_area:
-                        max_area = area
-                        max_contour = cnt
-                        max_x = x
+                    if x < min_x:
+                        min_x = x
 
         '''
         # GREEN
@@ -156,7 +168,7 @@ if __name__ == '__main__':
         publisher_red.publish(red)
         
         state = Float64()
-        state.data = max_x
+        state.data = min_x
         state_publisher.publish(state)
         # green = UInt16()
         # red.data = count_green
