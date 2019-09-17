@@ -38,7 +38,7 @@
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "setpoint_node");
+  ros::init(argc, argv, "setpoint");
   ROS_INFO("Starting setpoint publisher");
   ros::NodeHandle setpoint_node;
 
@@ -57,7 +57,6 @@ int main(int argc, char** argv)
   while (ros::ok())
   {
     ros::spinOnce();
-
     setpoint_pub.publish(setpoint);  // publish twice so graph gets it as a step
     // setpoint.data = 0 - setpoint.data;
     // setpoint_pub.publish(setpoint);

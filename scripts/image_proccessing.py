@@ -63,7 +63,6 @@ if __name__ == '__main__':
     
     while not rospy.is_shutdown():
         data = rospy.wait_for_message('/makarax/image', Image)
-	print("kesini")
         threshold = rospy.wait_for_message('/makarax/threshold', Threshold)
         # do stuff
         count_red = 0
@@ -102,7 +101,6 @@ if __name__ == '__main__':
         # Contours detection
         contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
         min_x = 9999
-	print("kesini")
         for cnt in contours:
             area = cv2.contourArea(cnt)
             approx = cv2.approxPolyDP(cnt, 0.02*cv2.arcLength(cnt, True), True)

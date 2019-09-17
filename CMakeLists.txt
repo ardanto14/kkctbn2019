@@ -163,12 +163,12 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
 add_executable(motor_controller src/motor_controller.cpp)
 target_link_libraries(motor_controller ${catkin_LIBRARIES})
 
-# add_executable(command src/command.cpp)
-# target_link_libraries(command ${catkin_LIBRARIES})
-
 add_executable(mode src/mode.cpp)
 target_link_libraries(mode ${catkin_LIBRARIES})
 
+
+add_executable(setpoint src/setpoint.cpp)
+target_link_libraries(setpoint ${catkin_LIBRARIES})
 #############
 ## Install ##
 #############
