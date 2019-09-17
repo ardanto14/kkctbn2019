@@ -28,14 +28,15 @@ threshold.u_v = 255
 def nothing(x):
     pass
 
-def abc(threshold_in):
+def threshold_callback(threshold_in):
+    global threshold
     threshold = threshold_in
 
 if __name__ == '__main__':
     rospy.init_node('image_processing', anonymous=True)
-
+    global threshold
     image_subscriber = rospy.Subscriber('/makarax/image', Image, nothing)
-    threshold_subscriber = rospy.Subscriber("/makarax/threshold", Threshold, abc)
+    threshold_subscriber = rospy.Subscriber("/makarax/threshold", Threshold, threshold_callback)
     publisher_red = rospy.Publisher('/makarax/object/count/red', UInt16, queue_size=8)
     # publisher_green = rospy.Publisher('/makarax/object/count/green', UInt16, queue_size=8)
     state_publisher = rospy.Publisher("state", Float64, queue_size=8)
@@ -63,7 +64,6 @@ if __name__ == '__main__':
     
     while not rospy.is_shutdown():
         data = rospy.wait_for_message('/makarax/image', Image)
-        threshold = rospy.wait_for_message('/makarax/threshold', Threshold)
         # do stuff
         count_red = 0
         count_green = 0
