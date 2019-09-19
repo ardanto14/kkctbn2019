@@ -10,6 +10,7 @@
 #include <sensor_msgs/Joy.h>
 
 ros::Publisher override_publisher;
+ros::Publisher throttle_pwm_publisher;
 kkctbn2019::Mode mode;
 float control_effort;
 int currentThrottlePwm = 1600;
@@ -45,6 +46,9 @@ void modeCallback(const kkctbn2019::Mode::ConstPtr& msg) {
 
 void modeCallback1(const std_msgs::UInt16::ConstPtr& zzz) {
     // ROS_INFO("Current Throttle is %d", currentThrottlePwm);
+    std_msgs::UInt16 throttle_pwm;
+    throttle_pwm.data = currentThrottlePwm;
+    throttle_pwm_publisher.publish(throttle_pwm);
     if (mode.value == kkctbn2019::Mode::MANUAL) {
         // ROS_INFO("MANUAL");
     } 
@@ -78,6 +82,8 @@ int main(int argc, char **argv) {
     ros::NodeHandle nh;
 
     override_publisher = nh.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 8);
+
+    throttle_pwm_publisher = nh.advertise<std_msgs::UInt16>("/makarax/pwm/throttle", 8);
 
     ros::Subscriber mode_subscriber = nh.subscribe("/makarax/mode", 8, modeCallback);
 

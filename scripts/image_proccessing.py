@@ -7,7 +7,6 @@ from sensor_msgs.msg import Image, CompressedImage
 from std_msgs.msg import UInt16, Float64
 from kkctbn2019.msg import Config
 
-font = cv2.FONT_HERSHEY_COMPLEX
 data = None
 MIN_AREA = 600
 
@@ -123,7 +122,7 @@ if __name__ == '__main__':
                 cv2.drawContours(frame, [approx], 0, (0, 0, 0), 5)
                 cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
                 if 7 <= len(approx) < 20:
-                    cv2.putText(frame, "Circle Red", (x, y), font, 0.5, (0, 0, 255))
+                    cv2.putText(frame, "Circle Red", (x, y), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255))
                     count_red += 1
                     if x < min_x:
                         min_x = x
