@@ -1,8 +1,7 @@
-Cara makenya
+Clone di catkin workspace
 
-1. mkdir catkin_ws
-2. cd catkin_ws
-3. mkdir src
-4. catkin_make
-5. cd src
-6. clone repo ini
+Dependency
+1. ROS Pid
+2. mavros
+3. python tkinter (sudo apt install python-tk)
+4. python pillow (pip install pillow)

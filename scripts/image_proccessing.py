@@ -21,7 +21,7 @@ config.u_s = 255
 config.u_v = 255
 config.brightness = 50
 config.contrast = 50
-config.gamma = 0
+config.gamma = 0.1
 
 def nothing(x):
     pass
