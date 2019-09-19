@@ -1,66 +1,55 @@
 #!/usr/bin/env python
-from scipy.spatial import distance as dist
-from imutils import perspective
-from imutils import contours
-import numpy as np
-import argparse
-import imutils
 import cv2
 import rospy
-from cv_bridge import CvBridge, CvBridgeError
-from sensor_msgs.msg import Image
-from std_msgs.msg import UInt16, Float64
-import random
-from kkctbn2019.msg import Threshold
+from kkctbn2019.msg import Config
+import Tkinter
 
-font = cv2.FONT_HERSHEY_COMPLEX
-data = None
-MIN_AREA = 1000
-
-def nothing(x):
-    pass
-
-def callback1(image):
-    pass  
+def add_slider(text, from_, to_, resolution, default=0):
+    frame = Tkinter.Frame()
+    label = Tkinter.Label(frame, text=text, fg='white', font=("Helvetica", 12))
+    label.grid(row=1, column=1, padx=10, pady=10)
+    scale = Tkinter.Scale(frame, from_=from_, to=to_, resolution=resolution, orient=Tkinter.HORIZONTAL, length=300)
+    scale.set(default)
+    scale.grid(row=1, column=2, padx=10, pady=0)
+    frame.pack()
+    return scale
 
 
 if __name__ == '__main__':
     try:
         rospy.init_node('image_processing', anonymous=True)
-        threshold_publisher = rospy.Publisher("/makarax/threshold", Threshold, queue_size=8)
+        config_publisher = rospy.Publisher("/makarax/config", Config, queue_size=8)
 
-        cv2.startWindowThread()
-        cv2.namedWindow("Trackbars")
-        cv2.createTrackbar("RED L-H", "Trackbars", 0, 255, nothing)
-        cv2.createTrackbar("RED L-S", "Trackbars", 56, 255, nothing)
-        cv2.createTrackbar("RED L-V", "Trackbars", 112, 255, nothing)
-        cv2.createTrackbar("RED U-H", "Trackbars", 19, 255, nothing)
-        cv2.createTrackbar("RED U-S", "Trackbars", 255, 255, nothing)
-        cv2.createTrackbar("RED U-V", "Trackbars", 255, 255, nothing)
+        master = Tkinter.Tk()
+        master.title("Config")
 
-        # cv2.createTrackbar("GREEN L-H", "Trackbars", 0, 255, nothing)
-        # cv2.createTrackbar("GREEN L-S", "Trackbars", 0, 255, nothing)
-        # cv2.createTrackbar("GREEN L-V", "Trackbars", 0, 255, nothing)
-        # cv2.createTrackbar("GREEN U-H", "Trackbars", 255, 255, nothing)
-        # cv2.createTrackbar("GREEN U-S", "Trackbars", 255, 255, nothing)
-        # cv2.createTrackbar("GREEN U-V", "Trackbars", 255, 255, nothing)
+        contrast = add_slider('Contrast', -255, 255, 1)
+        brightness = add_slider('Brightness', -127, 127, 1)
+        gamma = add_slider('Gamma', 0.1, 3, 0.1, 1)
+        roi_y = add_slider('ROI Y', 0, 480, 1)
+        red_l_h = add_slider('RED L-H', 0, 255, 1, 0)
+        red_l_s = add_slider('RED L-S', 0, 255, 1, 56)
+        red_l_v = add_slider('RED L-V', 0, 255, 1, 112)
+        red_u_h = add_slider('RED U-H', 0, 255, 1, 19)
+        red_u_s = add_slider('RED U-S', 0, 255, 1, 255)
+        red_u_v = add_slider('RED U-V', 0, 255, 1, 255)
+
         while not rospy.is_shutdown():
-            l_h = cv2.getTrackbarPos("RED L-H", "Trackbars")
-            l_s = cv2.getTrackbarPos("RED L-S", "Trackbars")
-            l_v = cv2.getTrackbarPos("RED L-V", "Trackbars")
-            u_h = cv2.getTrackbarPos("RED U-H", "Trackbars")
-            u_s = cv2.getTrackbarPos("RED U-S", "Trackbars")
-            u_v = cv2.getTrackbarPos("RED U-V", "Trackbars")
+            master.update()
 
-            msg = Threshold()
-            msg.l_h = l_h
-            msg.l_s = l_s
-            msg.l_v = l_v
-            msg.u_h = u_h
-            msg.u_s = u_s
-            msg.u_v = u_v
+            msg = Config()
+            msg.l_h = red_l_h.get()
+            msg.l_s = red_l_s.get()
+            msg.l_v = red_l_v.get()
+            msg.u_h = red_u_h.get()
+            msg.u_s = red_u_s.get()
+            msg.u_v = red_u_v.get()
+            msg.brightness = brightness.get()
+            msg.contrast = contrast.get()
+            msg.gamma = gamma.get()
+            msg.roi_y = roi_y.get()
 
-            threshold_publisher.publish(msg)
+            config_publisher.publish(msg)
 
     except rospy.ROSInterruptException:
         cv2.destroyAllWindows()

@@ -1,66 +1,56 @@
 #!/usr/bin/env python
-from scipy.spatial import distance as dist
-from imutils import perspective
-from imutils import contours
 import numpy as np
-import argparse
-import imutils
 import cv2
 import rospy
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image, CompressedImage
 from std_msgs.msg import UInt16, Float64
-import random
-from kkctbn2019.msg import Threshold
+from kkctbn2019.msg import Config
 
 font = cv2.FONT_HERSHEY_COMPLEX
 data = None
 MIN_AREA = 1000
 
-threshold = Threshold()
-threshold.l_h = 0
-threshold.l_s = 0
-threshold.l_v = 0
-threshold.u_h = 255
-threshold.u_s = 255
-threshold.u_v = 255
+global config
+config = Config()
+config.l_h = 0
+config.l_s = 0
+config.l_v = 0
+config.u_h = 255
+config.u_s = 255
+config.u_v = 255
+config.brightness = 50
+config.contrast = 50
+config.gamma = 0
 
 def nothing(x):
     pass
 
-def threshold_callback(threshold_in):
-    global threshold
-    threshold = threshold_in
+def config_callback(config_in):
+    global config
+    config = config_in
+
+def adjust_gamma(image, gamma=1.0):
+	# build a lookup table mapping the pixel values [0, 255] to
+	# their adjusted gamma values
+	invGamma = 1.0 / gamma
+	table = np.array([((i / 255.0) ** invGamma) * 255
+		for i in np.arange(0, 256)]).astype("uint8")
+ 
+	# apply gamma correction using the lookup table
+	return cv2.LUT(image, table)
 
 if __name__ == '__main__':
     rospy.init_node('image_processing', anonymous=True)
-    global threshold
+    global config
     image_subscriber = rospy.Subscriber('/makarax/image', Image, nothing)
-    threshold_subscriber = rospy.Subscriber("/makarax/threshold", Threshold, threshold_callback)
+    config_subscriber = rospy.Subscriber("/makarax/config", Config, config_callback)
     publisher_red = rospy.Publisher('/makarax/object/count/red', UInt16, queue_size=8)
     # publisher_green = rospy.Publisher('/makarax/object/count/green', UInt16, queue_size=8)
     state_publisher = rospy.Publisher("state", Float64, queue_size=8)
     proccessed_image_publisher = rospy.Publisher("/makarax/image/proccessed/compressed", CompressedImage, queue_size=8)
     red_mask_publisher = rospy.Publisher("/makarax/image/mask/red/compressed", CompressedImage, queue_size=8)
     # green_mask_publisher = rospy.Publisher("/makarax/image/mask/green", Image, queue_size=8)
-    # cv2.startWindowThread()
-    # cv2.namedWindow("Trackbars")
-    # cv2.namedWindow("Frame")
-    # cv2.namedWindow("red_mask")
-    # cv2.namedWindow("green_mask")
-    # cv2.createTrackbar("RED L-H", "Trackbars", 0, 255, nothing)
-    # cv2.createTrackbar("RED L-S", "Trackbars", 0, 255, nothing)
-    # cv2.createTrackbar("RED L-V", "Trackbars", 0, 255, nothing)
-    # cv2.createTrackbar("RED U-H", "Trackbars", 255, 255, nothing)
-    # cv2.createTrackbar("RED U-S", "Trackbars", 255, 255, nothing)
-    # cv2.createTrackbar("RED U-V", "Trackbars", 255, 255, nothing)
-
-    # cv2.createTrackbar("GREEN L-H", "Trackbars", 0, 255, nothing)
-    # cv2.createTrackbar("GREEN L-S", "Trackbars", 0, 255, nothing)
-    # cv2.createTrackbar("GREEN L-V", "Trackbars", 0, 255, nothing)
-    # cv2.createTrackbar("GREEN U-H", "Trackbars", 255, 255, nothing)
-    # cv2.createTrackbar("GREEN U-S", "Trackbars", 255, 255, nothing)
-    # cv2.createTrackbar("GREEN U-V", "Trackbars", 255, 255, nothing)
     
     while not rospy.is_shutdown():
         data = rospy.wait_for_message('/makarax/image', Image)
@@ -69,24 +59,40 @@ if __name__ == '__main__':
         count_green = 0
         bridge = CvBridge()
         ori = bridge.imgmsg_to_cv2(data)
+
+        brightness = config.brightness
+        contrast = config.contrast
+        gamma = config.gamma
+
         frame = ori.copy()
-	frame = np.int16(frame)
-	frame = frame * (50/127+1) - 50 + 70
-	frame = np.clip(frame, 0, 255)
-	frame = np.uint8(frame)
+
+        if gamma == 0:
+            pass
+        else:
+            frame = adjust_gamma(frame, gamma=gamma)
+
+        # change contrast and brightness
+        frame = np.int16(frame)
+        frame = frame * (contrast/127+1) - contrast + brightness
+        frame = np.clip(frame, 0, 255)
+        frame = np.uint8(frame)
+
         height, width = frame.shape[:2]
+
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         hsv = cv2.GaussianBlur(hsv, (5, 5), 1)
-        cv2.line(frame, (width, height/2), (0, height/2), (0,255,0), 2)
-        cv2.line(frame, (30, height), (30, 0), (0,255,0), 2)
+
+        # set ROI
+        roi_y = config.roi_y
+        cv2.line(frame, (width, roi_y), (0, roi_y), (0,255,0), 2)
         
         # RED
-        l_h = threshold.l_h
-        l_s = threshold.l_s
-        l_v = threshold.l_v
-        u_h = threshold.u_h
-        u_s = threshold.u_s
-        u_v = threshold.u_v
+        l_h = config.l_h
+        l_s = config.l_s
+        l_v = config.l_v
+        u_h = config.u_h
+        u_s = config.u_s
+        u_v = config.u_v
 
         lower_red = np.array([l_h, l_s, l_v])
         upper_red = np.array([u_h, u_s, u_v])
@@ -109,8 +115,8 @@ if __name__ == '__main__':
                 continue
             x = int(M["m10"] / M["m00"])
             y = int(M["m01"] / M["m00"])
-            
-            if area > MIN_AREA: # and y > height/2:
+
+            if area > MIN_AREA and y > roi_y:
                 cv2.drawContours(frame, [approx], 0, (0, 0, 0), 5)
                 cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
                 if 7 <= len(approx) < 20:
