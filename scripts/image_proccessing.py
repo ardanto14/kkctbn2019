@@ -15,7 +15,7 @@ from kkctbn2019.msg import Threshold
 
 font = cv2.FONT_HERSHEY_COMPLEX
 data = None
-MIN_AREA = 1000
+MIN_AREA = 600
 
 threshold = Threshold()
 threshold.l_h = 0
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         ori = bridge.imgmsg_to_cv2(data)
         frame = ori.copy()
 	frame = np.int16(frame)
-	frame = frame * (50/127+1) - 50 + 70
+	frame = frame * (85/127+1) - 85 + 70
 	frame = np.clip(frame, 0, 255)
 	frame = np.uint8(frame)
         height, width = frame.shape[:2]

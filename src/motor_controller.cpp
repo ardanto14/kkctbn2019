@@ -53,13 +53,13 @@ void modeCallback1(const std_msgs::UInt16::ConstPtr& zzz) {
         if (zzz->data == 0){
             mavros_msgs::OverrideRCIn rcin;
             rcin.channels[2] = currentThrottlePwm;
-            rcin.channels[0] = 800;
+            rcin.channels[0] = 1600;
             override_publisher.publish(rcin);
         } else {
             mavros_msgs::OverrideRCIn rcin;
             for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
             rcin.channels[2] = currentThrottlePwm;
-            rcin.channels[0] = 1500 - control_effort;
+            rcin.channels[0] = 1500 + control_effort;
             if (rcin.channels[0] > 2200) {
                 rcin.channels[0] = 2200;
             }
