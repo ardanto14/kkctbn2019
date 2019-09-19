@@ -44,12 +44,12 @@ void modeCallback(const kkctbn2019::Mode::ConstPtr& msg) {
 }
 
 void modeCallback1(const std_msgs::UInt16::ConstPtr& zzz) {
-    ROS_INFO("Current Throttle is %d", currentThrottlePwm);
+    // ROS_INFO("Current Throttle is %d", currentThrottlePwm);
     if (mode.value == kkctbn2019::Mode::MANUAL) {
-        ROS_INFO("MANUAL");
+        // ROS_INFO("MANUAL");
     } 
     else if (mode.value == kkctbn2019::Mode::AUTO) {
-        ROS_INFO("AUTO");
+        // ROS_INFO("AUTO");
         if (zzz->data == 0){
             mavros_msgs::OverrideRCIn rcin;
             rcin.channels[2] = currentThrottlePwm;
@@ -69,7 +69,7 @@ void modeCallback1(const std_msgs::UInt16::ConstPtr& zzz) {
             override_publisher.publish(rcin);
         }
     } else {
-        ROS_INFO("HOLD");
+        // ROS_INFO("HOLD");
     }
 }
 

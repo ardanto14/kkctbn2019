@@ -82,6 +82,8 @@ if __name__ == '__main__':
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         hsv = cv2.GaussianBlur(hsv, (5, 5), 1)
+        kernel = np.ones((5, 5), np.uint8)
+        hsv = cv2.erode(hsv, kernel)
 
         # set ROI
         roi_y = config.roi_y
@@ -100,10 +102,10 @@ if __name__ == '__main__':
 
         red_mask = cv2.inRange(hsv, lower_red, upper_red)
         # red_mask = cv2.Canny(hsv, 50, 100)
-        kernel = np.ones((5, 5), np.uint8)
+        # kernel = np.ones((5, 5), np.uint8)
 
-        red_mask = cv2.dilate(red_mask, kernel)
-        red_mask = cv2.erode(red_mask, kernel)
+        # red_mask = cv2.dilate(red_mask, kernel)
+        # red_mask = cv2.erode(red_mask, kernel)
         
         # Contours detection
         contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
