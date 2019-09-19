@@ -60,7 +60,7 @@ add_message_files(
   Command.msg
   ObjectCoordinate.msg
   Mode.msg
-  Threshold.msg
+  Config.msg
 )
 
 ## Generate services in the 'srv' folder
