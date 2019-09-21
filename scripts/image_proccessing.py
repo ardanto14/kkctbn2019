@@ -57,7 +57,7 @@ if __name__ == '__main__':
     state_publisher = rospy.Publisher("state", Float64, queue_size=8)
     proccessed_image_publisher = rospy.Publisher("/makarax/image/proccessed/compressed", CompressedImage, queue_size=8)
     red_mask_publisher = rospy.Publisher("/makarax/image/mask/red/compressed", CompressedImage, queue_size=8)
-    green_mask_publisher = rospy.Publisher("/makarax/image/mask/green", Image, queue_size=8)
+    green_mask_publisher = rospy.Publisher("/makarax/image/mask/green/compressed", CompressedImage, queue_size=8)
     
     while not rospy.is_shutdown():
         data = rospy.wait_for_message('/makarax/image', Image)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         green_u_v = config.green_u_v
 
         lower_green = np.array([green_l_h, green_l_s, green_l_v])
-        uppergreen = np.array([green_u_h, green_u_s, green_u_v])
+        upper_green = np.array([green_u_h, green_u_s, green_u_v])
 
         green_mask = cv2.inRange(hsv, lower_green, upper_green)
         # green_mask = cv2.Canny(hsv, 50, 100)
