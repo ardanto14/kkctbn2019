@@ -10,7 +10,8 @@ from std_msgs.msg import UInt16
 from kkctbn2019.msg import Mode
 
 ori = np.zeros([480,640,3], dtype=np.uint8)
-mask = np.zeros([480,640,3], dtype=np.uint8)
+red_mask = np.zeros([480,640,3], dtype=np.uint8)
+green_mask = np.zeros([480,640,3], dtype=np.uint8)
 throttlePwm = 0
 mode = "NONE"
 
@@ -31,10 +32,16 @@ def image_callback(img):
     ori = ori_cv2
 
 def red_mask_callback(img):
-    global mask
+    global red_mask
     mask_cv2 = np.fromstring(img.data, np.uint8)
     mask_cv2 = cv2.imdecode(mask_cv2, cv2.IMREAD_COLOR)
-    mask = mask_cv2
+    red_mask = mask_cv2
+
+def green_mask_callback(img):
+    global green_mask
+    mask_cv2 = np.fromstring(img.data, np.uint8)
+    mask_cv2 = cv2.imdecode(mask_cv2, cv2.IMREAD_COLOR)
+    green_mask = mask_cv2 
 
 def throttle_pwm_callback(pwm):
     global throttlePwm
@@ -42,11 +49,11 @@ def throttle_pwm_callback(pwm):
 
 def mode_callback(mode_in):
     global mode
-    if mode_in.value == mode.MANUAL:
+    if mode_in.value == Mode.MANUAL:
         mode = "MANUAL"
-    elif mode_in.value == mode.AUTO:
+    elif mode_in.value == Mode.AUTO:
         mode = "AUTO"
-    elif mode_in.value == mode.HOLD:
+    elif mode_in.value == Mode.HOLD:
         mode = "HOLD"
 
 if __name__ == '__main__':
@@ -54,6 +61,7 @@ if __name__ == '__main__':
     config_publisher = rospy.Publisher("/makarax/config", Config, queue_size=8)
     image_subscriber = rospy.Subscriber("/makarax/image/proccessed/compressed", CompressedImage, image_callback)
     red_mask_subscriber = rospy.Subscriber("/makarax/image/mask/red/compressed", CompressedImage, red_mask_callback)
+    green_mask_subscriber = rospy.Subscriber("/makarax/image/mask/green/compressed", CompressedImage, green_mask_callback)
     throttle_pwm_subscriber = rospy.Subscriber("/makarax/pwm/throttle", UInt16, throttle_pwm_callback)
     mode_subscriber = rospy.Subscriber("/makarax/mode", Mode, mode_callback)
 
@@ -86,8 +94,11 @@ if __name__ == '__main__':
     ori_label = Tkinter.Label(master=master, image=None)
     ori_label.grid(row=2, column=1)
 
-    mask_label = Tkinter.Label(master=master, image=None)
-    mask_label.grid(row=2, column=2)
+    red_mask_label = Tkinter.Label(master=master, image=None)
+    red_mask_label.grid(row=2, column=2)
+
+    green_mask_label = Tkinter.Label(master=master, image=None)
+    green_mask_label.grid(row=2, column=3)
 
     while not rospy.is_shutdown():
         if ori is not None:
@@ -97,12 +108,19 @@ if __name__ == '__main__':
             imgtk = ImageTk.PhotoImage(image=im)
             ori_label.config(image=imgtk)
 
-        if mask is not None:
-            b,g,r = cv2.split(mask)
+        if red_mask is not None:
+            b,g,r = cv2.split(red_mask)
             img = cv2.merge((r,g,b)) 
             mask_im = Image.fromarray(img)
             mask_tk = ImageTk.PhotoImage(image=mask_im)
-            mask_label.config(image=mask_tk)
+            red_mask_label.config(image=mask_tk)
+        
+        if green_mask is not None:
+            b,g,r = cv2.split(green_mask)
+            img = cv2.merge((r,g,b)) 
+            mask_im = Image.fromarray(img)
+            mask_tk = ImageTk.PhotoImage(image=mask_im)
+            green_mask_label.config(image=mask_tk)
 
         pwmLabel.config(text="PWM Throttle: " + str(throttlePwm))
         modeLabel.config(text="Mode: " + mode)
