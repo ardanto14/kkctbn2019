@@ -1,9 +1,10 @@
 
 <launch>
+    <include file="$(find mavros)/launch/apm.launch"/>
 
     <node pkg="kkctbn2019" name="motor_controller" type="motor_controller" output="screen"/>
 
-    <node pkg="kkctbn2019" name="mode" type="mode" output="screen"/>
+    <node pkg="kkctbn2019" name="mode" type="mode.py" output="screen"/>
 
     <node pkg="kkctbn2019" name="receiver" type="receiver.py" output="screen"/>
 

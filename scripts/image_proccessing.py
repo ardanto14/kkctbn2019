@@ -185,10 +185,20 @@ if __name__ == '__main__':
         # cv2.imshow("Frame", frame)
         # cv2.imshow("red_mask", red_mask)
         # cv2.waitKey(30)
+<<<<<<< HEAD
         objectCount = ObjectCount()
         objectCount.red = count_red
         objectCount.green = count_green
         object_count_publisher.publish(objectCount)
+=======
+        red = UInt16()
+        red.data = count_red
+        publisher_red.publish(red)
+
+        green = UInt16()
+        green.data = count_green
+        publisher_green.publish(green)
+>>>>>>> 42722677865d2dc98425a44db44dbea8c6178fc0
         
         state = Float64()
         state.data = min_x
