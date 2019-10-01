@@ -106,6 +106,7 @@ void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
                 rcin.channels[2] = currentThrottlePwm;
                 rcin.channels[0] = 1600;
                 override_publisher.publish(rcin);
+            }
         }
     }
 }
@@ -122,13 +123,8 @@ int main(int argc, char **argv) {
 
     ros::Subscriber control_effort_subscriber = nh.subscribe("control_effort", 8, controlEffortCallback);
     
-<<<<<<< HEAD
     ros::Subscriber red_count_subscriber = nh.subscribe("/makarax/object/count",8, objectCountCallback);
 
-=======
-    ros::Subscriber control_effort1_subscriber = nh.subscribe("/makarax/object/count/red",8, modeCallback1);
-    ros::Subscriber green_subscriver = nh.subscribe("/makarax/object/count/green", 8, greenCallback);
->>>>>>> 42722677865d2dc98425a44db44dbea8c6178fc0
     ros::Subscriber joy_subscriber = nh.subscribe("joy", 8, joyCallback);
 
     ros::Subscriber auto_control_subscriber = nh.subscribe("/makarax/auto_control", 8, autoControlCallback);
