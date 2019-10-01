@@ -13,7 +13,12 @@ ros::Publisher override_publisher;
 ros::Publisher throttle_pwm_publisher;
 kkctbn2019::Mode mode;
 float control_effort;
-int currentThrottlePwm = 1600;
+int currentThrottlePwm = 1700;
+int green = 0;
+
+void greenCallback(const std_msgs::UInt16::ConstPtr& msg) {
+    green = msg->data;
+}
 
 void joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
     if (msg->buttons[0] == 1) {
@@ -54,12 +59,19 @@ void modeCallback1(const std_msgs::UInt16::ConstPtr& zzz) {
     } 
     else if (mode.value == kkctbn2019::Mode::AUTO) {
         // ROS_INFO("AUTO");
-        if (zzz->data == 0){
+	if (green > 0 && zzz->data > 0) {
+	    mavros_msgs::OverrideRCIn rcin;
+	    rcin.channels[2] = currentThrottlePwm;
+		rcin.channels[0] = 1500;
+		override_publisher.publish(rcin);
+	} else if (green > 0 && zzz->data == 0){
+		ROS_INFO("green");
             mavros_msgs::OverrideRCIn rcin;
             rcin.channels[2] = currentThrottlePwm;
-            rcin.channels[0] = 1600;
+            rcin.channels[0] = 1675;
             override_publisher.publish(rcin);
-        } else {
+        } else if (zzz->data > 0) {
+		ROS_INFO("red");
             mavros_msgs::OverrideRCIn rcin;
             for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
             rcin.channels[2] = currentThrottlePwm;
@@ -71,7 +83,12 @@ void modeCallback1(const std_msgs::UInt16::ConstPtr& zzz) {
                 rcin.channels[0] = 800;
             }
             override_publisher.publish(rcin);
-        }
+        } else {
+	    mavros_msgs::OverrideRCIn rcin;
+	    rcin.channels[2] = currentThrottlePwm;
+            rcin.channels[0] = 1500;
+            override_publisher.publish(rcin);
+	}
     } else {
         // ROS_INFO("HOLD");
     }
@@ -90,7 +107,7 @@ int main(int argc, char **argv) {
     ros::Subscriber control_effort_subscriber = nh.subscribe("control_effort", 8, controlEffortCallback);
     
     ros::Subscriber control_effort1_subscriber = nh.subscribe("/makarax/object/count/red",8, modeCallback1);
-
+    ros::Subscriber green_subscriver = nh.subscribe("/makarax/object/count/green", 8, greenCallback);
     ros::Subscriber joy_subscriber = nh.subscribe("joy", 8, joyCallback);
 
     ROS_WARN("controller is active");

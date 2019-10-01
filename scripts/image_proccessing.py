@@ -179,7 +179,7 @@ if __name__ == '__main__':
         publisher_red.publish(red)
 
         green = UInt16()
-        red.data = count_green
+        green.data = count_green
         publisher_green.publish(green)
         
         state = Float64()
