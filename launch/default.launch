@@ -7,7 +7,7 @@
     <node pkg="kkctbn2019" name="mode" type="mode.py" output="screen"/>
 
     <node pkg="kkctbn2019" name="receiver" type="receiver.py" output="screen"/>
-
+    <node pkg="kkctbn2019" name="auto_control" type="auto_control.py" output="screen"/>
     <node pkg="kkctbn2019" name="image_proccessing" type="image_proccessing.py" output="screen"/>
 
     <node pkg="kkctbn2019" name="setpoint" type="setpoint" output="screen"/>

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-from mavros.msg import RCIn
+from mavros_msgs.msg import RCIn
 from kkctbn2019.msg import AutoControl
 
 def rc_callback(msg):
@@ -10,9 +10,8 @@ def rc_callback(msg):
         control.state = AutoControl.AVOID_RED;
     else:
         control.state = AutoControl.AVOID_RED_AND_GREEN;
-    
+
     auto_control_publisher.publish(control)
-    
 
 if __name__  == '__main__':
     rospy.init_node("auto_control")
