@@ -1,0 +1,4 @@
+uint16 AVOID_RED = 1301
+uint16 AVOID_RED_AND_GREEN = 1302
+
+uint8 state

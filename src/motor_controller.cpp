@@ -3,15 +3,19 @@
 #include <ros/ros.h>
 #include <kkctbn2019/Command.h>
 #include <kkctbn2019/Mode.h>
+#include <kkctbn2019/AutoControl.h>
+#include <kkctbn2019/ObjectCount.h>
 #include <mavros_msgs/OverrideRCIn.h>
 #include <std_msgs/Float64.h>
-#include <stdlib.h>
 #include <std_msgs/UInt16.h>
+#include <stdlib.h>
 #include <sensor_msgs/Joy.h>
 
 ros::Publisher override_publisher;
 ros::Publisher throttle_pwm_publisher;
+ros::Publisher state_publisher;
 kkctbn2019::Mode mode;
+kkctbn2019::AutoControl autoControl;
 float control_effort;
 int currentThrottlePwm = 1600;
 
@@ -44,36 +48,60 @@ void modeCallback(const kkctbn2019::Mode::ConstPtr& msg) {
     }
 }
 
-void modeCallback1(const std_msgs::UInt16::ConstPtr& zzz) {
+void autoControlCallback(const kkctbn2019::AutoControl::ConstPtr& msg) {
+    autoControl = *msg;
+}
+
+void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
     // ROS_INFO("Current Throttle is %d", currentThrottlePwm);
     std_msgs::UInt16 throttle_pwm;
     throttle_pwm.data = currentThrottlePwm;
     throttle_pwm_publisher.publish(throttle_pwm);
-    if (mode.value == kkctbn2019::Mode::MANUAL) {
-        // ROS_INFO("MANUAL");
-    } 
-    else if (mode.value == kkctbn2019::Mode::AUTO) {
-        // ROS_INFO("AUTO");
-        if (zzz->data == 0){
-            mavros_msgs::OverrideRCIn rcin;
-            rcin.channels[2] = currentThrottlePwm;
-            rcin.channels[0] = 1600;
-            override_publisher.publish(rcin);
+    if (mode.value == kkctbn2019::Mode::AUTO) {
+        if (autoControl.state == kkctbn2019::AutoControl::AVOID_RED_AND_GREEN) {
+            if (msg->red > 0){
+                mavros_msgs::OverrideRCIn rcin;
+                for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
+                rcin.channels[2] = currentThrottlePwm;
+                rcin.channels[0] = 1500 + control_effort;
+                if (rcin.channels[0] > 2200) {
+                    rcin.channels[0] = 2200;
+                }
+                else if (rcin.channels[0] < 800) {
+                    rcin.channels[0] = 800;
+                }
+                override_publisher.publish(rcin);
+            } else if (msg->green > 0) {
+                mavros_msgs::OverrideRCIn rcin;
+                for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
+                rcin.channels[2] = currentThrottlePwm;
+                rcin.channels[0] = 1650;
+                override_publisher.publish(rcin);
+            } else {
+                mavros_msgs::OverrideRCIn rcin;
+                rcin.channels[2] = currentThrottlePwm;
+                rcin.channels[0] = 1600;
+                override_publisher.publish(rcin);
+            }
         } else {
-            mavros_msgs::OverrideRCIn rcin;
-            for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
-            rcin.channels[2] = currentThrottlePwm;
-            rcin.channels[0] = 1500 + control_effort;
-            if (rcin.channels[0] > 2200) {
-                rcin.channels[0] = 2200;
-            }
-            else if (rcin.channels[0] < 800) {
-                rcin.channels[0] = 800;
-            }
-            override_publisher.publish(rcin);
+            if (msg->red > 0) {
+                mavros_msgs::OverrideRCIn rcin;
+                for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
+                rcin.channels[2] = currentThrottlePwm;
+                rcin.channels[0] = 1500 + control_effort;
+                if (rcin.channels[0] > 2200) {
+                    rcin.channels[0] = 2200;
+                }
+                else if (rcin.channels[0] < 800) {
+                    rcin.channels[0] = 800;
+                }
+                override_publisher.publish(rcin);
+            } else {
+                mavros_msgs::OverrideRCIn rcin;
+                rcin.channels[2] = currentThrottlePwm;
+                rcin.channels[0] = 1600;
+                override_publisher.publish(rcin);
         }
-    } else {
-        // ROS_INFO("HOLD");
     }
 }
 
@@ -89,9 +117,11 @@ int main(int argc, char **argv) {
 
     ros::Subscriber control_effort_subscriber = nh.subscribe("control_effort", 8, controlEffortCallback);
     
-    ros::Subscriber control_effort1_subscriber = nh.subscribe("/makarax/object/count/red",8, modeCallback1);
+    ros::Subscriber red_count_subscriber = nh.subscribe("/makarax/object/count",8, objectCountCallback);
 
     ros::Subscriber joy_subscriber = nh.subscribe("joy", 8, joyCallback);
+
+    ros::Subscriber auto_control_subscriber = nh.subscribe("/makarax/auto_control", 8, autoControlCallback);
 
     ROS_WARN("controller is active");
 

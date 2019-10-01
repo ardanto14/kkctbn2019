@@ -15,8 +15,8 @@ green_mask = np.zeros([480,640,3], dtype=np.uint8)
 throttlePwm = 0
 mode = "NONE"
 
-def add_slider(text, from_, to_, resolution, default=0):
-    frame = Tkinter.Frame(master=slider_frame)
+def add_slider(text, from_, to_, resolution, master, default=0):
+    frame = Tkinter.Frame(master=master)
     label = Tkinter.Label(frame, text=text, fg='black', font=("Helvetica", 12))
     label.grid(row=1, column=1, padx=10, pady=10)
     scale = Tkinter.Scale(frame, from_=from_, to=to_, resolution=resolution, orient=Tkinter.HORIZONTAL, length=300)
@@ -68,27 +68,29 @@ if __name__ == '__main__':
     master = Tkinter.Tk()
     master.title("Config")
 
-    slider_frame = Tkinter.Frame(master=master)
+    slider_frame1 = Tkinter.Frame(master=master)
 
-    contrast = add_slider('Contrast', -255, 255, 1)
-    brightness = add_slider('Brightness', -127, 127, 1)
-    gamma = add_slider('Gamma', 0.1, 3, 0.1, 1)
-    roi_y = add_slider('ROI Y', 0, 480, 1)
-    red_l_h = add_slider('RED L-H', 0, 255, 1, 0)
-    red_l_s = add_slider('RED L-S', 0, 255, 1, 56)
-    red_l_v = add_slider('RED L-V', 0, 255, 1, 112)
-    red_u_h = add_slider('RED U-H', 0, 255, 1, 19)
-    red_u_s = add_slider('RED U-S', 0, 255, 1, 255)
-    red_u_v = add_slider('RED U-V', 0, 255, 1, 255)
+    contrast = add_slider('Contrast', -255, 255, 1, slider_frame1)
+    brightness = add_slider('Brightness', -127, 127, 1, slider_frame1)
+    gamma = add_slider('Gamma', 0.1, 3, 0.1, slider_frame1, 1)
+    roi_y = add_slider('ROI Y', 0, 480, 1, slider_frame1)
+    red_l_h = add_slider('RED L-H', 0, 255, 1, slider_frame1, 110)
+    red_l_s = add_slider('RED L-S', 0, 255, 1, slider_frame1, 56)
+    red_l_v = add_slider('RED L-V', 0, 255, 1, slider_frame1, 0)
+    red_u_h = add_slider('RED U-H', 0, 255, 1, slider_frame1, 255)
+    red_u_s = add_slider('RED U-S', 0, 255, 1, slider_frame1, 255)
+    red_u_v = add_slider('RED U-V', 0, 255, 1, slider_frame1, 255)
 
-    green_l_h = add_slider('GREEN L-H', 0, 255, 1, 0)
-    green_l_s = add_slider('GREEN L-S', 0, 255, 1, 56)
-    green_l_v = add_slider('GREEN L-V', 0, 255, 1, 112)
-    green_u_h = add_slider('GREEN U-H', 0, 255, 1, 19)
-    green_u_s = add_slider('GREEN U-S', 0, 255, 1, 255)
-    green_u_v = add_slider('GREEN U-V', 0, 255, 1, 255)
+    slider_frame2 = Tkinter.Frame(master=master)
+    green_l_h = add_slider('GREEN L-H', 0, 255, 1, slider_frame2, 69)
+    green_l_s = add_slider('GREEN L-S', 0, 255, 1, slider_frame2, 43)
+    green_l_v = add_slider('GREEN L-V', 0, 255, 1, slider_frame2, 0)
+    green_u_h = add_slider('GREEN U-H', 0, 255, 1, slider_frame2, 99)
+    green_u_s = add_slider('GREEN U-S', 0, 255, 1, slider_frame2, 255)
+    green_u_v = add_slider('GREEN U-V', 0, 255, 1, slider_frame2, 255)
 
-    slider_frame.grid(row=1, column=1)
+    slider_frame1.grid(row=1, column=2)
+    slider_frame2.grid(row=1, column=3)
 
     info_frame = Tkinter.Frame(master=master)
     pwmLabel = Tkinter.Label(info_frame, text="PWM Throttle: " + str(throttlePwm), fg='black', font=("Helvetica", 12))
@@ -96,7 +98,7 @@ if __name__ == '__main__':
     pwmLabel.pack()
     modeLabel.pack()
 
-    info_frame.grid(row=1, column=2)
+    info_frame.grid(row=1, column=1)
 
     ori_label = Tkinter.Label(master=master, image=None)
     ori_label.grid(row=2, column=1)

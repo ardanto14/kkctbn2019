@@ -4,16 +4,16 @@ import cv2
 import rospy
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image, CompressedImage
-from std_msgs.msg import UInt16, Float64
-from kkctbn2019.msg import Config
+from std_msgs.msg import Float64
+from kkctbn2019.msg import Config, ObjectCount, AutoControl
 
 data = None
 MIN_AREA = 600
 
-global config
 config = Config()
-config.red_l_h = 0
-config.red_l_s = 0
+
+config.red_l_h = 115
+config.red_l_s = 60
 config.red_l_v = 0
 config.red_u_h = 255
 config.red_u_s = 255
@@ -26,9 +26,12 @@ config.green_u_h = 255
 config.green_u_s = 255
 config.green_u_v = 255
 
-config.brightness = 50
-config.contrast = 50
-config.gamma = 0.1
+config.brightness = 0
+config.contrast = 0
+config.gamma = 1
+
+auto_control = AutoControl()
+auto_control.state = AutoControl.AVOID_RED_AND_GREEN
 
 def nothing(x):
     pass
@@ -36,6 +39,9 @@ def nothing(x):
 def config_callback(config_in):
     global config
     config = config_in
+
+def auto_control_callback(msg):
+    auto_control = msg.state
 
 def adjust_gamma(image, gamma=1.0):
 	# build a lookup table mapping the pixel values [0, 255] to
@@ -52,8 +58,9 @@ if __name__ == '__main__':
     global config
     image_subscriber = rospy.Subscriber('/makarax/image', Image, nothing)
     config_subscriber = rospy.Subscriber("/makarax/config", Config, config_callback)
-    publisher_red = rospy.Publisher('/makarax/object/count/red', UInt16, queue_size=8)
-    publisher_green = rospy.Publisher('/makarax/object/count/green', UInt16, queue_size=8)
+    auto_control_subscriber = rospy.Subscriber("/makarax/auto_control", AutoControl, auto_control_callback)
+
+    object_count_publisher = rospy.Publisher('/makarax/object/count', ObjectCount, queue_size=8)
     state_publisher = rospy.Publisher("state", Float64, queue_size=8)
     proccessed_image_publisher = rospy.Publisher("/makarax/image/proccessed/compressed", CompressedImage, queue_size=8)
     red_mask_publisher = rospy.Publisher("/makarax/image/mask/red/compressed", CompressedImage, queue_size=8)
@@ -155,6 +162,7 @@ if __name__ == '__main__':
         # green_mask = cv2.erode(green_mask, kernel)
 
         # Contours detection
+        max_x = 0
         contours, _ = cv2.findContours(green_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
         for cnt in contours:
             area = cv2.contourArea(cnt)
@@ -170,21 +178,26 @@ if __name__ == '__main__':
                 if 7 <= len(approx) < 20:
                     cv2.putText(frame, "Circle Green", (x, y), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255))
                     count_green += 1
+                    if x > max_x:
+                        max_x = x
+
         
         # cv2.imshow("Frame", frame)
         # cv2.imshow("red_mask", red_mask)
         # cv2.waitKey(30)
-        red = UInt16()
-        red.data = count_red
-        publisher_red.publish(red)
-
-        green = UInt16()
-        red.data = count_green
-        publisher_green.publish(green)
+        objectCount = ObjectCount()
+        objectCount.red = count_red
+        objectCount.green = count_green
+        object_count_publisher.publish(objectCount)
         
         state = Float64()
         state.data = min_x
         state_publisher.publish(state)
+
+        if auto_control.state == AutoControl.AVOID_RED_AND_GREEN and count_green > 0:
+            state = Float64()
+            state.data = min_x - 640
+            state_publisher.publish(state)
 
         published_red_mask = CompressedImage()
         published_red_mask.header.stamp = rospy.Time.now()
