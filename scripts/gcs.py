@@ -7,12 +7,13 @@ from PIL import Image, ImageTk
 from sensor_msgs.msg import CompressedImage
 import numpy as np
 from std_msgs.msg import UInt16
-from kkctbn2019.msg import Mode
+from kkctbn2019.msg import Mode, AutoControl
 
 ori = np.zeros([480,640,3], dtype=np.uint8)
 red_mask = np.zeros([480,640,3], dtype=np.uint8)
 green_mask = np.zeros([480,640,3], dtype=np.uint8)
 throttlePwm = 0
+auto_in = "NONE"
 mode = "NONE"
 
 def add_slider(text, from_, to_, resolution, master, default=0):
@@ -55,11 +56,21 @@ def mode_callback(mode_in):
         mode = "AUTO"
     elif mode_in.value == Mode.HOLD:
         mode = "HOLD"
+    
+def auto_control_callback(msg):
+    global auto_in
+    if msg.state == AutoControl.AVOID_RED:
+        auto_in = 'AVOID RED'
+    elif msg.state == AutoControl.AVOID_RED_AND_GREEN:
+        auto_in = 'AVOID RED AND GREEN'
+    else:
+        auto_in = 'AVOID WHAT'
 
 if __name__ == '__main__':
     rospy.init_node('gcs', anonymous=True)
     config_publisher = rospy.Publisher("/makarax/config", Config, queue_size=8)
     image_subscriber = rospy.Subscriber("/makarax/image/proccessed/compressed", CompressedImage, image_callback)
+    auto_control_subscriber = rospy.Subscriber("/makarax/auto_control", AutoControl, auto_control_callback)
     red_mask_subscriber = rospy.Subscriber("/makarax/image/mask/red/compressed", CompressedImage, red_mask_callback)
     green_mask_subscriber = rospy.Subscriber("/makarax/image/mask/green/compressed", CompressedImage, green_mask_callback)
     throttle_pwm_subscriber = rospy.Subscriber("/makarax/pwm/throttle", UInt16, throttle_pwm_callback)
@@ -95,8 +106,10 @@ if __name__ == '__main__':
     info_frame = Tkinter.Frame(master=master)
     pwmLabel = Tkinter.Label(info_frame, text="PWM Throttle: " + str(throttlePwm), fg='black', font=("Helvetica", 12))
     modeLabel = Tkinter.Label(info_frame, text="Mode: " + mode, fg='black', font=("Helvetica", 12))
+    autoLabel = Tkinter.Label(info_frame, text="Auto: " + auto_in, fg='black', font=("Helvetica", 12))
     pwmLabel.pack()
     modeLabel.pack()
+    autoLabel.pack()
 
     info_frame.grid(row=1, column=1)
 
@@ -133,6 +146,7 @@ if __name__ == '__main__':
 
         pwmLabel.config(text="PWM Throttle: " + str(throttlePwm))
         modeLabel.config(text="Mode: " + mode)
+        autoLabel.config(text="Auto: " + auto_in)
         master.update()
 
         msg = Config()
