@@ -14,15 +14,12 @@
 ros::Publisher override_publisher;
 ros::Publisher throttle_pwm_publisher;
 ros::Publisher state_publisher;
+
 kkctbn2019::Mode mode;
 kkctbn2019::AutoControl autoControl;
+kkctbn2019::AutoControl autoControlBefore;
 float control_effort;
 int currentThrottlePwm = 1700;
-int green = 0;
-
-void greenCallback(const std_msgs::UInt16::ConstPtr& msg) {
-    green = msg->data;
-}
 
 void joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
     if (msg->buttons[0] == 1) {
@@ -46,15 +43,16 @@ void controlEffortCallback(const std_msgs::Float64::ConstPtr& msg) {
 
 void modeCallback(const kkctbn2019::Mode::ConstPtr& msg) {
     mode = *msg;
-    if (mode.value == kkctbn2019::Mode::MANUAL) {
+}
+
+void autoControlCallback(const kkctbn2019::AutoControl::ConstPtr& msg) {
+    autoControlBefore = autoControl;
+    autoControl = *msg;
+    if (autoControlBefore.state != kkctbn2019::AutoControl::MANUAL && autoControl.state == kkctbn2019::AutoControl::MANUAL) {
         mavros_msgs::OverrideRCIn rcin;
         for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
         override_publisher.publish(rcin);
     }
-}
-
-void autoControlCallback(const kkctbn2019::AutoControl::ConstPtr& msg) {
-    autoControl = *msg;
 }
 
 void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
@@ -62,9 +60,9 @@ void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
     std_msgs::UInt16 throttle_pwm;
     throttle_pwm.data = currentThrottlePwm;
     throttle_pwm_publisher.publish(throttle_pwm);
-    if (mode.value == kkctbn2019::Mode::AUTO) {
+    if (autoControl.state != kkctbn2019::AutoControl::MANUAL && mode.value == kkctbn2019::Mode::ARMED) {
         if (autoControl.state == kkctbn2019::AutoControl::AVOID_RED_AND_GREEN) {
-            if (msg->red > 0){
+            if (msg->red > 0) {
                 mavros_msgs::OverrideRCIn rcin;
                 for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
                 rcin.channels[2] = currentThrottlePwm;

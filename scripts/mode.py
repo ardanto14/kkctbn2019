@@ -14,11 +14,7 @@ def pwm_mode_callback(msg):
         mode_publisher.publish(mode);
     elif (pwm > 1600):
         mode = Mode()
-        mode.value = Mode.MANUAL;
-        mode_publisher.publish(mode);
-    else:
-        mode = Mode()
-        mode.value = Mode.AUTO;
+        mode.value = Mode.ARMED;
         mode_publisher.publish(mode);
 
 if __name__ == '__main__':
