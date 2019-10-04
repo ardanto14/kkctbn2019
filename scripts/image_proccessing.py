@@ -12,17 +12,17 @@ MIN_AREA = 600
 
 config = Config()
 
-config.red_l_h = 115
-config.red_l_s = 60
+config.red_l_h = 110
+config.red_l_s = 56
 config.red_l_v = 0
 config.red_u_h = 255
 config.red_u_s = 255
 config.red_u_v = 255
 
-config.green_l_h = 0
-config.green_l_s = 0
+config.green_l_h = 69
+config.green_l_s = 43
 config.green_l_v = 0
-config.green_u_h = 255
+config.green_u_h = 99
 config.green_u_s = 255
 config.green_u_v = 255
 

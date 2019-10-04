@@ -4,12 +4,18 @@ from mavros_msgs.msg import RCIn
 from kkctbn2019.msg import AutoControl
 
 def rc_callback(msg):
-    pwm = msg.channels[6];
+    try:
+        pwm = msg.channels[6];
+    except IndexError:
+        pwm = 1300
+
     control = AutoControl()
     if pwm < 1400:
-        control.state = AutoControl.AVOID_RED;
-    else:
+        control.state = AutoControl.MANUAL;
+    elif pwm > 1600:
         control.state = AutoControl.AVOID_RED_AND_GREEN;
+    else:
+        control.state = AutoControl.AVOID_RED;
 
     auto_control_publisher.publish(control)
 
