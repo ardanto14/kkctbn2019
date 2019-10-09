@@ -76,9 +76,14 @@ void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
                 override_publisher.publish(rcin);
             } else if (msg->green > 0) {
                 mavros_msgs::OverrideRCIn rcin;
-                for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
                 rcin.channels[2] = currentThrottlePwm;
-                rcin.channels[0] = 1650;
+                rcin.channels[0] = 1500 + control_effort;
+                if (rcin.channels[0] > 2200) {
+                    rcin.channels[0] = 2200;
+                }
+                else if (rcin.channels[0] < 800) {
+                    rcin.channels[0] = 800;
+                }
                 override_publisher.publish(rcin);
             } else {
                 mavros_msgs::OverrideRCIn rcin;
