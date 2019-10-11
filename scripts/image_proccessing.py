@@ -6,12 +6,13 @@ from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image, CompressedImage
 from std_msgs.msg import Float64
 from kkctbn2019.msg import Config, ObjectCount, AutoControl
+from kkctbn2019.cfg import Kkctbn2019Config
+import dynamic_reconfigure.client
 
 data = None
 MIN_AREA = 600
 
 config = Config()
-
 config.red_l_h = 110
 config.red_l_s = 56
 config.red_l_v = 0
@@ -56,7 +57,7 @@ def adjust_gamma(image, gamma=1.0):
 
 if __name__ == '__main__':
     rospy.init_node('image_processing', anonymous=True)
-    global config
+
     image_subscriber = rospy.Subscriber('/makarax/image', Image, nothing)
     config_subscriber = rospy.Subscriber("/makarax/config", Config, config_callback)
     auto_control_subscriber = rospy.Subscriber("/makarax/auto_control", AutoControl, auto_control_callback)
@@ -74,6 +75,7 @@ if __name__ == '__main__':
         count_green = 0
         bridge = CvBridge()
         ori = bridge.imgmsg_to_cv2(data)
+
 
         brightness = config.brightness
         contrast = config.contrast

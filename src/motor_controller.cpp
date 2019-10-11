@@ -28,6 +28,10 @@ void pwmOverrideCallback(const std_msgs::Bool::ConstPtr& msg) {
     pwm_override = msg->data;
 }
 
+void pwmCallback(const std_msgs::UInt16::ConstPtr& msg) {
+    currentThrottlePwm = msg->data;
+}
+
 void joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
     if (msg->buttons[0] == 1) {
         currentThrottlePwm += 50;
@@ -65,8 +69,8 @@ void autoControlCallback(const kkctbn2019::AutoControl::ConstPtr& msg) {
 void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
     // ROS_INFO("Current Throttle is %d", currentThrottlePwm);
     std_msgs::UInt16 throttle_pwm;
-    throttle_pwm.data = currentThrottlePwm;
-    throttle_pwm_publisher.publish(throttle_pwm);
+    // throttle_pwm.data = currentThrottlePwm;
+    // throttle_pwm_publisher.publish(throttle_pwm);
     if (autoControl.state != kkctbn2019::AutoControl::MANUAL && mode.value == kkctbn2019::Mode::ARMED) {
         if (autoControl.state == kkctbn2019::AutoControl::AVOID_RED_AND_GREEN) {
             if (msg->red > 0) {
@@ -98,7 +102,11 @@ void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
                 override_publisher.publish(rcin);
             } */ else {
                 mavros_msgs::OverrideRCIn rcin;
-                rcin.channels[2] = currentThrottlePwm;
+                if (pwm_override) {
+                    rcin.channels[2] = 1900;
+                } else {
+                    rcin.channels[2] = currentThrottlePwm;
+                }
                 rcin.channels[0] = 1650;
                 override_publisher.publish(rcin);
             }
@@ -131,7 +139,7 @@ int main(int argc, char **argv) {
 
     override_publisher = nh.advertise<mavros_msgs::OverrideRCIn>("/mavros/rc/override", 8);
 
-    throttle_pwm_publisher = nh.advertise<std_msgs::UInt16>("/makarax/pwm/throttle", 8);
+    ros::Subscriber pwm_subscriber = nh.subscribe("/makarax/pwm_throttle", 8, pwmCallback);
 
     ros::Subscriber mode_subscriber = nh.subscribe("/makarax/mode", 8, modeCallback);
 

@@ -15,10 +15,15 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   genmsg
   mavros_msgs
+  dynamic_reconfigure
 )
 
 find_package(
   OpenCV REQUIRED
+)
+
+generate_dynamic_reconfigure_options(
+    cfg/Kkctbn2019.cfg
 )
 
 ## System dependencies are found with CMake's conventions
