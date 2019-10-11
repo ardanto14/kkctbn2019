@@ -1,5 +1,7 @@
 <launch>
 
     <node pkg="kkctbn2019" name="gcs" type="gcs.py" output="screen"/>
+
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" />
     
 </launch>

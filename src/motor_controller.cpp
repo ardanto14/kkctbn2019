@@ -1,13 +1,13 @@
 #include <iostream>
 #include <string>
 #include <ros/ros.h>
-#include <kkctbn2019/Command.h>
 #include <kkctbn2019/Mode.h>
 #include <kkctbn2019/AutoControl.h>
 #include <kkctbn2019/ObjectCount.h>
 #include <mavros_msgs/OverrideRCIn.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/UInt16.h>
+#include <std_msgs/Bool.h>
 #include <stdlib.h>
 #include <sensor_msgs/Joy.h>
 
@@ -18,8 +18,15 @@ ros::Publisher state_publisher;
 kkctbn2019::Mode mode;
 kkctbn2019::AutoControl autoControl;
 kkctbn2019::AutoControl autoControlBefore;
+
+
 float control_effort;
 int currentThrottlePwm = 1700;
+bool pwm_override = false;
+
+void pwmOverrideCallback(const std_msgs::Bool::ConstPtr& msg) {
+    pwm_override = msg->data;
+}
 
 void joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
     if (msg->buttons[0] == 1) {
@@ -65,7 +72,11 @@ void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
             if (msg->red > 0) {
                 mavros_msgs::OverrideRCIn rcin;
                 for (int i = 0; i < 8; i ++) rcin.channels[i] = 0;
-                rcin.channels[2] = currentThrottlePwm;
+                if (pwm_override) {
+                    rcin.channels[2] = 1900;
+                } else {
+                    rcin.channels[2] = currentThrottlePwm;
+                }
                 rcin.channels[0] = 1500 + control_effort;
                 if (rcin.channels[0] > 2200) {
                     rcin.channels[0] = 2200;
@@ -74,7 +85,7 @@ void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
                     rcin.channels[0] = 800;
                 }
                 override_publisher.publish(rcin);
-            } else if (msg->green > 0) {
+            } /**else if (msg->green > 0) {
                 mavros_msgs::OverrideRCIn rcin;
                 rcin.channels[2] = currentThrottlePwm;
                 rcin.channels[0] = 1500 + control_effort;
@@ -85,10 +96,10 @@ void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
                     rcin.channels[0] = 800;
                 }
                 override_publisher.publish(rcin);
-            } else {
+            } */ else {
                 mavros_msgs::OverrideRCIn rcin;
                 rcin.channels[2] = currentThrottlePwm;
-                rcin.channels[0] = 1600;
+                rcin.channels[0] = 1650;
                 override_publisher.publish(rcin);
             }
         } else {
@@ -107,7 +118,7 @@ void objectCountCallback(const kkctbn2019::ObjectCount::ConstPtr& msg) {
             } else {
                 mavros_msgs::OverrideRCIn rcin;
                 rcin.channels[2] = currentThrottlePwm;
-                rcin.channels[0] = 1600;
+                rcin.channels[0] = 1650;
                 override_publisher.publish(rcin);
             }
         }
@@ -123,6 +134,8 @@ int main(int argc, char **argv) {
     throttle_pwm_publisher = nh.advertise<std_msgs::UInt16>("/makarax/pwm/throttle", 8);
 
     ros::Subscriber mode_subscriber = nh.subscribe("/makarax/mode", 8, modeCallback);
+
+    ros::Subscriber pwm_override_subscriber = nh.subscribe("/makarax/pwm_override", 8, pwmOverrideCallback);
 
     ros::Subscriber control_effort_subscriber = nh.subscribe("control_effort", 8, controlEffortCallback);
     

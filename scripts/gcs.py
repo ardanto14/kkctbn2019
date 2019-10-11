@@ -79,14 +79,14 @@ if __name__ == '__main__':
 
     slider_frame1 = Tkinter.Frame(master=master)
 
-    contrast = add_slider('Contrast', -255, 255, 1, slider_frame1, 215)
-    brightness = add_slider('Brightness', -127, 127, 1, slider_frame1, 0)
+    contrast = add_slider('Contrast', -255, 255, 1, slider_frame1, 0)
+    brightness = add_slider('Brightness', -127, 127, 1, slider_frame1, -2)
     gamma = add_slider('Gamma', 0.1, 3, 0.1, slider_frame1, 1)
     roi_y = add_slider('ROI Y', 0, 480, 1, slider_frame1, 5)
-    red_l_h = add_slider('RED L-H', 0, 255, 1, slider_frame1, 0)
-    red_l_s = add_slider('RED L-S', 0, 255, 1, slider_frame1, 76)
-    red_l_v = add_slider('RED L-V', 0, 255, 1, slider_frame1, 155)
-    red_u_h = add_slider('RED U-H', 0, 255, 1, slider_frame1, 9)
+    red_l_h = add_slider('RED L-H', 0, 255, 1, slider_frame1, 118)
+    red_l_s = add_slider('RED L-S', 0, 255, 1, slider_frame1, 77)
+    red_l_v = add_slider('RED L-V', 0, 255, 1, slider_frame1, 0)
+    red_u_h = add_slider('RED U-H', 0, 255, 1, slider_frame1, 186)
     red_u_s = add_slider('RED U-S', 0, 255, 1, slider_frame1, 255)
     red_u_v = add_slider('RED U-V', 0, 255, 1, slider_frame1, 255)
 

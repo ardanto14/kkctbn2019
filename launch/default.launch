@@ -12,12 +12,14 @@
 
     <node pkg="kkctbn2019" name="setpoint" type="setpoint" output="screen"/>
 
+    <node pkg="kkctbn2019" name="pwm_override" type="pwm_override.py" output="screen"/>
+
     <node respawn="true" pkg="joy" type="joy_node" name="turtle_joy" >
       <param name="dev" type="string" value="/dev/input/js0" />
       <param name="deadzone" value="0.12" />
     </node>
     
-    <node name="controller" pkg="pid" type="controller" >
+    <node name="controller" pkg="pid" type="controller" output="screen">
       <param name="Kp" value="1.4" />
       <param name="Ki" value="0.1" />
       <param name="Kd" value="0" />
@@ -27,4 +29,16 @@
       <param name="max_loop_frequency" value="100.0" />
       <param name="min_loop_frequency" value="100.0" />
     </node>
+    <!--
+      <node name="test" pkg="kkctbn2019" type="image_proccessing.py" output="screen">
+      <param name="Kp" value="1.4" />
+      <param name="Ki" value="0.1" />
+      <param name="Kd" value="0" />
+      <param name="upper_limit" value="1000.0" />
+      <param name="lower_limit" value="-1000.0" />
+      <param name="windup_limit" value="100.0" />
+      <param name="max_loop_frequency" value="100.0" />
+      <param name="min_loop_frequency" value="100.0" />
+    </node>
+    -->
 </launch>
